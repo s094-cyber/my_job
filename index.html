@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MY JOB - نظام إدارة المبيعات والمنتجات</title>
-    <!-- مكتبات التنسيق، النمط، وتوليد الـ PDF -->
+    <title>MY JOB - نظام إدارة المبيعات (FLORA)</title>
+    <!-- مكتبات التنسيق والـ PDF -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -34,13 +34,13 @@
         }
         .pattern-grid {
             display: grid;
-            grid-template-columns: repeat(3, 70px);
-            grid-gap: 25px;
+            grid-template-columns: repeat(3, 75px);
+            grid-gap: 20px;
             margin: 20px 0;
         }
         .dot {
-            width: 70px;
-            height: 70px;
+            width: 75px;
+            height: 75px;
             background-color: #1f2937;
             border: 2px solid var(--main-color);
             border-radius: 50%;
@@ -48,7 +48,8 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 22px;
+            font-weight: bold;
             transition: all 0.2s;
         }
         .dot.selected {
@@ -71,7 +72,11 @@
             transform: translateY(-3px);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        /* قالب الفاتورة المخصص للطباعة */
+        .category-btn.active {
+            background-color: var(--main-color) !important;
+            color: white !important;
+        }
+        /* قالب الفاتورة */
         #invoice-template {
             display: none;
             padding: 20px;
@@ -87,23 +92,23 @@
         <div class="text-center mb-3">
             <i class="fa-solid fa-gem fa-3x text-danger mb-2"></i>
             <h2>MY JOB / FLORA</h2>
-            <p class="text-muted">ارسم نمط الفتح (حرف L) للدخول للنظام</p>
+            <p class="text-muted">ارسم حرف L اضغط التتابع: (1 -> 2 -> 3 -> 5 -> 7 -> 8 -> 9)</p>
         </div>
         <div class="pattern-grid" id="patternGrid">
-            <div class="dot" data-id="0">1</div>
-            <div class="dot" data-id="1">2</div>
-            <div class="dot" data-id="2">3</div>
-            <div class="dot" data-id="3">4</div>
-            <div class="dot" data-id="4">5</div>
-            <div class="dot" data-id="5">6</div>
-            <div class="dot" data-id="6">7</div>
-            <div class="dot" data-id="7">8</div>
-            <div class="dot" data-id="8">9</div>
+            <div class="dot" data-id="1">1</div>
+            <div class="dot" data-id="2">2</div>
+            <div class="dot" data-id="3">3</div>
+            <div class="dot" data-id="4">4</div>
+            <div class="dot" data-id="5">5</div>
+            <div class="dot" data-id="6">6</div>
+            <div class="dot" data-id="7">7</div>
+            <div class="dot" data-id="8">8</div>
+            <div class="dot" data-id="9">9</div>
         </div>
         <button class="btn btn-outline-light btn-sm mt-3" onclick="resetPattern()">إعادة المحاولة</button>
     </div>
 
-    <!-- 2. الهيكل الرئيسي للموقع -->
+    <!-- 2. الهيكل الرئيسي -->
     <div id="main-app" class="d-none">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
             <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-store me-2"></i>FLORA - MY JOB</a>
@@ -119,21 +124,28 @@
 
         <div class="container-fluid">
             <div class="row">
-                <!-- قسم المنتجات -->
+                <!-- قسم المنتجات والتصنيفات -->
                 <div class="col-md-8 p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
                         <h4 class="fw-bold">قائمة المنتجات</h4>
                         <button class="btn btn-primary" style="background-color: var(--main-color); border:none;" data-bs-toggle="modal" data-bs-target="#addProductModal">
                             <i class="fa-solid fa-plus me-1"></i> إضافة منتج جديد
                         </button>
                     </div>
 
+                    <!-- أزرار الأقسام والتصنيفات -->
+                    <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
+                        <button class="btn btn-outline-secondary category-btn active" onclick="filterCategory('الكل', this)">الكل</button>
+                        <button class="btn btn-outline-secondary category-btn" onclick="filterCategory('مكياج', this)"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>مكياج</button>
+                        <button class="btn btn-outline-secondary category-btn" onclick="filterCategory('بيجامات وألبسة', this)"><i class="fa-solid fa-shirt me-1"></i>بيجامات وألبسة</button>
+                    </div>
+
                     <div class="row g-3" id="productsList">
-                        <!-- يتم عرض المنتجات هنا ديناميكياً -->
+                        <!-- عرض المنتجات ديناميكياً -->
                     </div>
                 </div>
 
-                <!-- شريط السلة والفاتورة -->
+                <!-- سلة المبيعات -->
                 <div class="col-md-4 sidebar p-4 d-flex flex-column">
                     <h4 class="fw-bold mb-3"><i class="fa-solid fa-cart-shopping me-2"></i>سلة الشراء</h4>
                     <div class="flex-grow-1 overflow-auto" id="cartList">
@@ -165,7 +177,15 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label class="form-label">اسم المنتج</label>
-                        <input type="text" id="pName" class="form-control" placeholder="مثال: أحمر شفاه FLORA">
+                        <input type="text" id="pName" class="form-control" placeholder="مثال: بيجامة ستاتي قطن / أحمر شفاه">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">القسم / التصنيف</label>
+                        <select id="pCategory" class="form-select">
+                            <option value="مكياج">مكياج</option>
+                            <option value="بيجامات وألبسة">بيجامات وألبسة</option>
+                            <option value="عام">عام</option>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">السعر ($)</label>
@@ -180,17 +200,17 @@
         </div>
     </div>
 
-    <!-- قالب الفاتورة المخفي للـ PDF -->
+    <!-- قالب الفاتورة -->
     <div id="invoice-template">
         <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
-            <h2>متجر FLORA للجمال والمكياج</h2>
-            <p>فاتورة مبيعات - MY JOB System</p>
+            <h2>متجر FLORA - الفواتير والمبيعات</h2>
+            <p>فاتورة مبيعات معتمدة</p>
         </div>
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
             <thead>
                 <tr style="background-color: #f2f2f2; border-bottom: 1px solid #ddd;">
                     <th style="padding: 8px; text-align: right;">المنتج</th>
-                    <th style="padding: 8px; text-align: center;">العدد</th>
+                    <th style="padding: 8px; text-align: center;">القسم</th>
                     <th style="padding: 8px; text-align: left;">السعر</th>
                 </tr>
             </thead>
@@ -201,12 +221,11 @@
         </div>
     </div>
 
-    <!-- البرمجة التفاعلية (JavaScript) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // --- 1. إدارة قفل النمط ---
+        // --- 1. قفل النمط بأرقام الشاشة الحقيقية ---
         let selectedSequence = [];
-        const targetSequence = "0,1,2,4,6,7,8"; // مسار حرف L الشهير
+        const targetSequence = "1,2,3,5,7,8,9"; // رسم حرف L بالأرقام 1,2,3,5,7,8,9
 
         document.querySelectorAll('.dot').forEach(dot => {
             dot.addEventListener('click', function() {
@@ -235,10 +254,13 @@
             document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
         }
 
-        // --- 2. إدارة البيانات والمنتجات ---
+        // --- 2. إدارة البيانات والتصنيفات ---
+        let currentCategory = 'الكل';
         let products = JSON.parse(localStorage.getItem('my_job_products')) || [
-            { id: 1, name: 'أحمر شفاه سائل FLORA', price: 15.0 },
-            { id: 2, name: 'بلاشر كريمي وردي FLORA', price: 12.5 }
+            { id: 1, name: 'أحمر شفاه FLORA', category: 'مكياج', price: 15.0 },
+            { id: 2, name: 'بلاشر كريمي FLORA', category: 'مكياج', price: 12.5 },
+            { id: 3, name: 'بيجامة قطن حرير FLORA', category: 'بيجامات وألبسة', price: 25.0 },
+            { id: 4, name: 'طقم بيجامة صيفي', category: 'بيجامات وألبسة', price: 20.0 }
         ];
         let cart = [];
 
@@ -247,13 +269,31 @@
             renderCart();
         }
 
+        function filterCategory(cat, btn) {
+            currentCategory = cat;
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderProducts();
+        }
+
         function renderProducts() {
             const container = document.getElementById('productsList');
             container.innerHTML = '';
-            products.forEach(p => {
+
+            const filteredProducts = currentCategory === 'الكل' 
+                ? products 
+                : products.filter(p => p.category === currentCategory);
+
+            if(filteredProducts.length === 0) {
+                container.innerHTML = '<div class="col-12 text-center text-muted py-5">لا توجد منتجات في هذا القسم حالياً</div>';
+                return;
+            }
+
+            filteredProducts.forEach(p => {
                 container.innerHTML += `
                     <div class="col-md-4">
                         <div class="product-card p-3 bg-white" onclick="addToCart(${p.id})">
+                            <span class="badge bg-secondary mb-2">${p.category}</span>
                             <h5 class="fw-bold text-dark">${p.name}</h5>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <span class="text-danger fw-bold fs-5">${p.price} $</span>
@@ -268,9 +308,11 @@
 
         function saveProduct() {
             const name = document.getElementById('pName').value;
+            const category = document.getElementById('pCategory').value;
             const price = parseFloat(document.getElementById('pPrice').value);
+
             if (name && !isNaN(price)) {
-                products.push({ id: Date.now(), name, price });
+                products.push({ id: Date.now(), name, category, price });
                 renderProducts();
                 bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
                 document.getElementById('pName').value = '';
@@ -278,7 +320,7 @@
             }
         }
 
-        // --- 3. إدارة السلة وتوليد الفاتورة ---
+        // --- 3. السلة والطباعة ---
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             cart.push(product);
@@ -305,7 +347,7 @@
                     <div class="d-flex justify-content-between align-items-center border-bottom py-2">
                         <div>
                             <div class="fw-bold">${item.name}</div>
-                            <small class="text-muted">${item.price} $</small>
+                            <small class="text-muted">${item.category} - ${item.price} $</small>
                         </div>
                         <button class="btn btn-sm btn-link text-danger" onclick="removeFromCart(${index})"><i class="fa-solid fa-trash"></i></button>
                     </div>
@@ -321,7 +363,6 @@
             renderCart();
         }
 
-        // --- 4. طباعة وتوليد PDF ---
         function printInvoice() {
             const invoiceItems = document.getElementById('invoiceItems');
             const invoiceTotal = document.getElementById('invoiceTotal');
@@ -333,7 +374,7 @@
                 invoiceItems.innerHTML += `
                     <tr>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
-                        <td style="padding: 8px; text-align: center; border-bottom: 1px solid #ddd;">1</td>
+                        <td style="padding: 8px; text-align: center; border-bottom: 1px solid #ddd;">${item.category}</td>
                         <td style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">${item.price} $</td>
                     </tr>
                 `;
@@ -348,7 +389,6 @@
             });
         }
 
-        // --- 5. النسخ الاحتياطي والاستعادة ---
         function exportData() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products));
             const downloadAnchor = document.createElement('a');
