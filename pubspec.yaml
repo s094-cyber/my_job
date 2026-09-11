@@ -1,0 +1,30 @@
+name: my_job
+description: "A new Flutter project for MY JOB application."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  pattern_lock: ^2.0.0
+  pdf: ^3.10.4
+  printing: ^5.11.0
+  share_plus: ^7.2.1
+  file_picker: ^6.1.1
+  path_provider: ^2.1.1
+  intl: ^0.18.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
