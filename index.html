@@ -1,413 +1,554 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MY JOB - نظام إدارة المبيعات (FLORA)</title>
-    <!-- مكتبات التنسيق والـ PDF -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>MY WORK - FLORA & ALORA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --radius-pill: 999px;
+  }
+  body[data-theme="home"]{
+    --bg:#FAF3EC; --surface:#FFFFFF; --ink:#3E2F2A; --ink-soft:#8A7A6E;
+    --accent:#C89A7B; --accent-strong:#B07F5C; --accent-tint:#F1E1D3;
+    --border:#E9DCCF; --shadow: rgba(62,47,42,0.10);
+    --success:#7C9A72; --success-tint:#E4EDDF; --warning:#CC8A4A; --warning-tint:#F7E7D3; --danger:#C1594A; --danger-tint:#F6E1DC;
+  }
+  body[data-theme="alora"]{
+    --bg:#FBF6F1; --surface:#FFFFFF; --ink:#4A3B35; --ink-soft:#9C8A7D;
+    --accent:#C89A7B; --accent-strong:#A87A57; --accent-tint:#EFDDD0;
+    --border:#EADFD3; --shadow: rgba(74,59,53,0.10);
+    --success:#7C9A72; --success-tint:#E4EDDF; --warning:#CC8A4A; --warning-tint:#F7E7D3; --danger:#C1594A; --danger-tint:#F6E1DC;
+  }
+  body[data-theme="flora"]{
+    --bg:#FFF6F4; --surface:#FFFFFF; --ink:#2E3A46; --ink-soft:#8C97A3;
+    --accent:#E8735F; --accent-strong:#D45C48; --accent-tint:#FBDAD3;
+    --border:#F3DAD3; --shadow: rgba(46,58,70,0.10);
+    --success:#6E9C7B; --success-tint:#E1EEE3; --warning:#D08A4A; --warning-tint:#F7E6D2; --danger:#C1453A; --danger-tint:#F6DFDA;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Cairo', sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit; cursor:pointer;}
+  input, select, textarea{font-family:inherit;}
+  ::selection{background:var(--accent-tint);}
 
-    <style>
-        :root {
-            --main-color: #d63384;
-            --main-hover: #b8256f;
-            --bg-color: #f8f9fa;
-        }
-        body {
-            background-color: var(--bg-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
-        }
-        /* شاشة القفل بالنمط */
-        #lock-screen {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: #111827;
-            color: white;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .pattern-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 75px);
-            grid-gap: 20px;
-            margin: 20px 0;
-        }
-        .dot {
-            width: 75px;
-            height: 75px;
-            background-color: #1f2937;
-            border: 2px solid var(--main-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 22px;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-        .dot.selected {
-            background-color: var(--main-color);
-            box-shadow: 0 0 15px var(--main-color);
-        }
-        /* الواجهة الرئيسية */
-        .sidebar {
-            background-color: #ffffff;
-            border-left: 1px solid #e5e7eb;
-            height: calc(100vh - 60px);
-        }
-        .product-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-        }
-        .product-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .category-btn.active {
-            background-color: var(--main-color) !important;
-            color: white !important;
-        }
-        /* قالب الفاتورة */
-        #invoice-template {
-            display: none;
-            padding: 20px;
-            background: #fff;
-            color: #000;
-        }
-    </style>
+  #app{min-height:100vh; display:flex; flex-direction:column;}
+
+  /* HOME SCREEN */
+  .home-wrap{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:40px 20px 60px; text-align:center; position:relative;
+  }
+  .home-title{ font-size:38px; font-weight:900; letter-spacing:1px; margin:0 0 6px; }
+  .home-sub{ font-size:15px; color:var(--ink-soft); margin:0 0 40px; font-weight:600; }
+  .home-logos{ display:flex; gap:40px; flex-wrap:wrap; align-items:flex-start; justify-content:center; }
+  .home-card{ display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .logo-btn{
+    width:170px; height:170px; border-radius:50%; border:4px solid var(--surface); padding:0; overflow:hidden;
+    box-shadow:0 14px 34px var(--shadow); transition:transform .18s ease, box-shadow .18s ease;
+    background:#fff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:28px; color:var(--accent-strong);
+  }
+  .logo-btn:hover{ transform:translateY(-4px); box-shadow:0 18px 40px var(--shadow); }
+  .home-card-label{ font-size:18px; font-weight:800; color:var(--ink); }
+
+  /* SECTION SCREEN */
+  .section-shell{ flex:1; display:flex; flex-direction:column; min-height:100vh; }
+  .topbar{
+    display:flex; align-items:center; gap:12px; padding:14px 20px; background:var(--surface);
+    border-bottom:1px solid var(--border); position:sticky; top:0; z-index:20;
+  }
+  .icon-btn{
+    width:40px; height:40px; min-width:40px; border-radius:var(--radius-pill); border:1px solid var(--border);
+    background:var(--surface); display:flex; align-items:center; justify-content:center; color:var(--ink);
+  }
+  .icon-btn:hover{ background:var(--accent-tint); }
+  .topbar-title{ font-weight:800; font-size:18px; white-space:nowrap; }
+  .search-wrap{
+    flex:1; display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--border);
+    border-radius:var(--radius-pill); padding:8px 16px; min-width:120px;
+  }
+  .search-wrap input{ border:none; background:transparent; outline:none; flex:1; font-size:14px; color:var(--ink); }
+
+  .section-body{ flex:1; display:flex; }
+  .sidebar{
+    width:230px; min-width:230px; background:var(--surface); border-left:1px solid var(--border);
+    padding:18px 14px; display:flex; flex-direction:column; gap:8px;
+  }
+  .sidebar-title{ font-size:12.5px; font-weight:800; color:var(--ink-soft); padding:0 6px 6px; }
+  .folder-item{
+    display:flex; align-items:center; justify-content:space-between; padding:11px 12px; border-radius:var(--radius-sm);
+    border:1px solid transparent; background:transparent; color:var(--ink); font-size:14px; font-weight:700; text-align:right; width:100%;
+  }
+  .folder-item:hover{ background:var(--bg); }
+  .folder-item.active{ background:var(--accent-tint); border-color:var(--accent); color:var(--ink); }
+
+  .content{ flex:1; padding:20px 24px; display:flex; flex-direction:column; gap:18px; min-width:0; }
+  .tabs{ display:flex; gap:6px; background:var(--surface); padding:5px; border-radius:var(--radius-pill); width:fit-content; border:1px solid var(--border); flex-wrap:wrap; }
+  .tab-btn{ border:none; background:transparent; padding:8px 18px; border-radius:var(--radius-pill); font-weight:700; font-size:13px; color:var(--ink-soft); }
+  .tab-btn.active{ background:var(--accent); color:#fff; }
+
+  .content-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .content-heading{ font-size:20px; font-weight:800; margin:0; }
+  .btn{ border:none; border-radius:var(--radius-pill); padding:10px 20px; font-weight:700; font-size:13.5px; display:inline-flex; align-items:center; gap:7px; }
+  .btn-primary{ background:var(--accent); color:#fff; box-shadow:0 6px 14px var(--shadow); }
+  .btn-primary:hover{ background:var(--accent-strong); }
+  .btn-secondary{ background:var(--surface); color:var(--ink); border:1px solid var(--border); }
+  
+  .product-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:16px; }
+  .product-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; display:flex; flex-direction:column; padding:14px; gap:8px; }
+  .product-name{ font-weight:800; font-size:15px; }
+  .product-detail{ font-size:12.5px; color:var(--ink-soft); font-weight:600; }
+  .product-price{ font-size:16px; font-weight:800; color:var(--accent-strong); margin-top:4px; }
+
+  .order-card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px; display:flex; flex-direction:column; gap:8px; }
+  .order-header{ display:flex; justify-content:space-between; font-weight:800; font-size:15px; }
+
+  /* MODALS */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(40,30,26,.42); display:flex; align-items:center; justify-content:center; z-index:100; padding:20px; }
+  .modal{ background:var(--surface); border-radius:var(--radius-lg); width:100%; max-width:500px; padding:22px; display:flex; flex-direction:column; gap:16px; box-shadow:0 24px 60px rgba(0,0,0,.25); }
+  .modal-title{ font-weight:800; font-size:18px; margin:0; }
+  .form-group{ display:flex; flex-direction:column; gap:6px; }
+  .form-label{ font-size:13px; font-weight:700; color:var(--ink-soft); }
+  .form-input, .form-select, .form-textarea{ border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 14px; font-size:14px; background:var(--bg); outline:none; }
+  .modal-footer{ display:flex; gap:10px; justify-content:flex-end; margin-top:8px; }
+
+  @media (max-width: 768px){
+    .sidebar{ width:100%; min-width:0; border-left:none; border-bottom:1px solid var(--border); }
+    .section-body{ flex-direction:column; }
+  }
+</style>
 </head>
-<body>
+<body data-theme="home">
 
-    <!-- 1. شاشة القفل بالنمط -->
-    <div id="lock-screen">
-        <div class="text-center mb-3">
-            <i class="fa-solid fa-gem fa-3x text-danger mb-2"></i>
-            <h2>MY JOB / FLORA</h2>
-            <p class="text-muted">ارسم حرف L اضغط التتابع: (1 -> 2 -> 3 -> 5 -> 7 -> 8 -> 9)</p>
+<div id="app"></div>
+<div id="modalRoot"></div>
+
+<script>
+(function(){
+"use strict";
+
+// --- State ---
+let state = {
+  currentView: 'home', // 'home' | 'alora' | 'flora'
+  currentTab: 'inventory', // 'inventory' | 'sales' | 'manufacturing' | 'debts'
+  activeFolder: 'جميع المنتجات',
+  searchQuery: '',
+  modal: null, // null | 'add_product' | 'add_sale' | 'add_batch' | 'add_debt'
+  
+  // Data
+  aloraData: {
+    folders: ['جميع المنتجات', 'بيجامات صيفية', 'بيجامات شتوية', 'روب نوم'],
+    products: [
+      { id: 1, name: 'بيجامة حرير ساتان', folder: 'بيجامات صيفية', price: 150, stock: 12, cost: 90 }
+    ],
+    sales: [],
+    manufacturing: [],
+    debts: []
+  },
+  floraData: {
+    folders: ['جميع المنتجات', 'أحمر شفاه', 'بلاشر كريمي', 'زيوت وخامات'],
+    products: [
+      { id: 101, name: 'بلاشر كريمي وردي', folder: 'بلاشر كريمي', price: 45, stock: 25, cost: 18 }
+    ],
+    sales: [],
+    manufacturing: [
+      { id: 1, title: 'تركيبة بلاشر وردي - دفعة #1', date: '2026-08-10', cost: 120, status: 'مكتملة' }
+    ],
+    debts: []
+  }
+};
+
+function getActiveData() {
+  return state.currentView === 'alora' ? state.aloraData : state.floraData;
+}
+
+// --- Render Functions ---
+function render() {
+  document.body.setAttribute('data-theme', state.currentView === 'home' ? 'home' : state.currentView);
+  const app = document.getElementById('app');
+  
+  if (state.currentView === 'home') {
+    app.innerHTML = renderHome();
+  } else {
+    app.innerHTML = renderSection();
+  }
+  
+  renderModal();
+}
+
+function renderHome() {
+  return `
+    <div class="home-wrap">
+      <h1 class="home-title">نظام إدارة العمل الخاص</h1>
+      <p class="home-sub">اختر القسم للمتابعة والإدارة</p>
+      <div class="home-logos">
+        <div class="home-card">
+          <button class="logo-btn" onclick="switchView('flora')">FLORA</button>
+          <span class="home-card-label">Flora Cosmetics</span>
         </div>
-        <div class="pattern-grid" id="patternGrid">
-            <div class="dot" data-id="1">1</div>
-            <div class="dot" data-id="2">2</div>
-            <div class="dot" data-id="3">3</div>
-            <div class="dot" data-id="4">4</div>
-            <div class="dot" data-id="5">5</div>
-            <div class="dot" data-id="6">6</div>
-            <div class="dot" data-id="7">7</div>
-            <div class="dot" data-id="8">8</div>
-            <div class="dot" data-id="9">9</div>
+        <div class="home-card">
+          <button class="logo-btn" onclick="switchView('alora')">ALORA</button>
+          <span class="home-card-label">Alora Sleepwear</span>
         </div>
-        <button class="btn btn-outline-light btn-sm mt-3" onclick="resetPattern()">إعادة المحاولة</button>
+      </div>
     </div>
+  `;
+}
 
-    <!-- 2. الهيكل الرئيسي -->
-    <div id="main-app" class="d-none">
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-            <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-store me-2"></i>FLORA - MY JOB</a>
-            <div class="ms-auto d-flex gap-2">
-                <button class="btn btn-outline-light btn-sm" onclick="exportData()"><i class="fa-solid fa-download me-1"></i>نسخ احتياطي</button>
-                <label class="btn btn-outline-light btn-sm mb-0">
-                    <i class="fa-solid fa-upload me-1"></i>استعادة
-                    <input type="file" onchange="importData(event)" hidden accept=".json">
-                </label>
-                <button class="btn btn-danger btn-sm" onclick="location.reload()"><i class="fa-solid fa-lock"></i></button>
+function renderSection() {
+  const data = getActiveData();
+  const title = state.currentView === 'flora' ? 'FLORA - مستحضرات التجميل' : 'ALORA - البيجامات النسائية';
+  
+  return `
+    <div class="section-shell">
+      <div class="topbar">
+        <button class="icon-btn" onclick="switchView('home')">➔</button>
+        <span class="topbar-title">${title}</span>
+        <div class="search-wrap">
+          <input type="text" placeholder="بحث..." value="${state.searchQuery}" oninput="handleSearch(this.value)">
+        </div>
+      </div>
+      
+      <div class="section-body">
+        <div class="sidebar">
+          <div class="sidebar-title">التصنيفات</div>
+          ${data.folders.map(f => `
+            <button class="folder-item ${state.activeFolder === f ? 'active' : ''}" onclick="selectFolder('${f}')">
+              <span>${f}</span>
+            </button>
+          `).join('')}
+        </div>
+        
+        <div class="content">
+          <div class="tabs">
+            <button class="tab-btn ${state.currentTab === 'inventory' ? 'active' : ''}" onclick="switchTab('inventory')">المخزون والمنتجات</button>
+            <button class="tab-btn ${state.currentTab === 'sales' ? 'active' : ''}" onclick="switchTab('sales')">المبيعات والفواتير</button>
+            ${state.currentView === 'flora' ? `
+              <button class="tab-btn ${state.currentTab === 'manufacturing' ? 'active' : ''}" onclick="switchTab('manufacturing')">التصنيع والتركيبات</button>
+            ` : ''}
+            <button class="tab-btn ${state.currentTab === 'debts' ? 'active' : ''}" onclick="switchTab('debts')">الديون والذمم</button>
+          </div>
+          
+          ${renderTabContent()}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTabContent() {
+  const data = getActiveData();
+  
+  if (state.currentTab === 'inventory') {
+    let items = data.products;
+    if (state.activeFolder !== 'جميع المنتجات') {
+      items = items.filter(p => p.folder === state.activeFolder);
+    }
+    if (state.searchQuery) {
+      items = items.filter(p => p.name.includes(state.searchQuery));
+    }
+    
+    return `
+      <div class="content-header">
+        <h2 class="content-heading">قائمة المنتجات (${items.length})</h2>
+        <button class="btn btn-primary" onclick="openModal('add_product')">+ إضافة منتج جديد</button>
+      </div>
+      <div class="product-grid">
+        ${items.map(p => `
+          <div class="product-card">
+            <div class="product-name">${p.name}</div>
+            <div class="product-detail">التصنيف: ${p.folder}</div>
+            <div class="product-detail">الكمية المتوفرة: ${p.stock}</div>
+            <div class="product-price">${p.price} $.ر.س</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  
+  if (state.currentTab === 'sales') {
+    return `
+      <div class="content-header">
+        <h2 class="content-heading">سجل المبيعات</h2>
+        <button class="btn btn-primary" onclick="openModal('add_sale')">+ تسجيل عملية بيع</button>
+      </div>
+      <div class="order-list">
+        ${data.sales.length === 0 ? '<p style="color:var(--ink-soft)">لا توجد عمليات بيع مسجلة حالياً.</p>' : ''}
+        ${data.sales.map(s => `
+          <div class="order-card">
+            <div class="order-header">
+              <span>العميل: ${s.customer}</span>
+              <span>المبلغ: ${s.amount} $.ر.س</span>
             </div>
-        </nav>
-
-        <div class="container-fluid">
-            <div class="row">
-                <!-- قسم المنتجات والتصنيفات -->
-                <div class="col-md-8 p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h4 class="fw-bold">قائمة المنتجات</h4>
-                        <button class="btn btn-primary" style="background-color: var(--main-color); border:none;" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                            <i class="fa-solid fa-plus me-1"></i> إضافة منتج جديد
-                        </button>
-                    </div>
-
-                    <!-- أزرار الأقسام والتصنيفات -->
-                    <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
-                        <button class="btn btn-outline-secondary category-btn active" onclick="filterCategory('الكل', this)">الكل</button>
-                        <button class="btn btn-outline-secondary category-btn" onclick="filterCategory('مكياج', this)"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>مكياج</button>
-                        <button class="btn btn-outline-secondary category-btn" onclick="filterCategory('بيجامات وألبسة', this)"><i class="fa-solid fa-shirt me-1"></i>بيجامات وألبسة</button>
-                    </div>
-
-                    <div class="row g-3" id="productsList">
-                        <!-- عرض المنتجات ديناميكياً -->
-                    </div>
-                </div>
-
-                <!-- سلة المبيعات -->
-                <div class="col-md-4 sidebar p-4 d-flex flex-column">
-                    <h4 class="fw-bold mb-3"><i class="fa-solid fa-cart-shopping me-2"></i>سلة الشراء</h4>
-                    <div class="flex-grow-1 overflow-auto" id="cartList">
-                        <p class="text-muted text-center mt-5">السلة فارغة حالياً</p>
-                    </div>
-                    
-                    <div class="border-top pt-3 mt-auto">
-                        <div class="d-flex justify-content-between fs-5 fw-bold mb-3">
-                            <span>المجموع الإجمالي:</span>
-                            <span id="totalPrice" class="text-danger">0.00 $</span>
-                        </div>
-                        <button class="btn btn-success w-100 py-2 fw-bold" id="btnPrint" onclick="printInvoice()" disabled>
-                            <i class="fa-solid fa-file-pdf me-2"></i>توليد طباعة الفاتورة (PDF)
-                        </button>
-                    </div>
-                </div>
+            <div class="product-detail">التاريخ: ${s.date}</div>
+            <div class="product-detail">التفاصيل: ${s.note || '-'}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  
+  if (state.currentTab === 'manufacturing') {
+    return `
+      <div class="content-header">
+        <h2 class="content-heading">سجل التكلفة والتركيبات المصنعة (خاص بـ Flora)</h2>
+        <button class="btn btn-primary" onclick="openModal('add_batch')">+ إضافة خلطة / تركيبة تصنيع</button>
+      </div>
+      <div class="order-list">
+        ${data.manufacturing.map(m => `
+          <div class="order-card">
+            <div class="order-header">
+              <span>${m.title}</span>
+              <span>التكلفة: ${m.cost} $.ر.س</span>
             </div>
-        </div>
-    </div>
-
-    <!-- نافذة إضافة منتج جديد -->
-    <div class="modal fade" id="addProductModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">إضافة منتج جديد</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">اسم المنتج</label>
-                        <input type="text" id="pName" class="form-control" placeholder="مثال: بيجامة ستاتي قطن / أحمر شفاه">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">القسم / التصنيف</label>
-                        <select id="pCategory" class="form-select">
-                            <option value="مكياج">مكياج</option>
-                            <option value="بيجامات وألبسة">بيجامات وألبسة</option>
-                            <option value="عام">عام</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">السعر ($)</label>
-                        <input type="number" id="pPrice" class="form-control" placeholder="0.00">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                    <button type="button" class="btn btn-primary" onclick="saveProduct()">حفظ المنتج</button>
-                </div>
+            <div class="product-detail">التاريخ: ${m.date} | الحالة: ${m.status}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+  
+  if (state.currentTab === 'debts') {
+    return `
+      <div class="content-header">
+        <h2 class="content-heading">إدارة الديون والآجل</h2>
+        <button class="btn btn-primary" onclick="openModal('add_debt')">+ تسجيل دين جديد</button>
+      </div>
+      <div class="order-list">
+        ${data.debts.length === 0 ? '<p style="color:var(--ink-soft)">لا توجد سجلات ديون مسجلة.</p>' : ''}
+        ${data.debts.map(d => `
+          <div class="order-card">
+            <div class="order-header">
+              <span>الاسم: ${d.name}</span>
+              <span style="color:var(--danger)">المبلغ: ${d.amount} $.ر.س</span>
             </div>
-        </div>
+            <div class="product-detail">تاريخ الاستحقاق: ${d.dueDate}</div>
+            <div class="product-detail">ملاحظات: ${d.notes || '-'}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+}
+
+function renderModal() {
+  const root = document.getElementById('modalRoot');
+  if (!state.modal) {
+    root.innerHTML = '';
+    return;
+  }
+  
+  let modalContent = '';
+  
+  if (state.modal === 'add_product') {
+    const data = getActiveData();
+    modalContent = `
+      <h3 class="modal-title">إضافة منتج جديد</h3>
+      <div class="form-group">
+        <label class="form-label">اسم المنتج</label>
+        <input type="text" id="m_pname" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">التصنيف</label>
+        <select id="m_pfolder" class="form-select">
+          ${data.folders.filter(f=>f!=='جميع المنتجات').map(f=>`<option value="${f}">${f}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">السعر</label>
+        <input type="number" id="m_pprice" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">الكمية الأولى</label>
+        <input type="number" id="m_pstock" class="form-input" value="1">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="saveProduct()">حفظ المنتج</button>
+      </div>
+    `;
+  } else if (state.modal === 'add_sale') {
+    modalContent = `
+      <h3 class="modal-title">تسجيل عملية بيع</h3>
+      <div class="form-group">
+        <label class="form-label">اسم العميل</label>
+        <input type="text" id="m_sclient" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">المبلغ الإجمالي</label>
+        <input type="number" id="m_samount" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ملاحظات</label>
+        <textarea id="m_snote" class="form-textarea" rows="2"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="saveSale()">تسجيل البيع</button>
+      </div>
+    `;
+  } else if (state.modal === 'add_batch') {
+    modalContent = `
+      <h3 class="modal-title">إضافة تركيبة مصنعة</h3>
+      <div class="form-group">
+        <label class="form-label">عنوان التركيبة / المنتج</label>
+        <input type="text" id="m_btitle" class="form-input" placeholder="مثال: أحمر شفاه سائل - دفعة جديدة">
+      </div>
+      <div class="form-group">
+        <label class="form-label">تكلفة المواد الأولية</label>
+        <input type="number" id="m_bcost" class="form-input">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="saveBatch()">حفظ التركيبة</button>
+      </div>
+    `;
+  } else if (state.modal === 'add_debt') {
+    modalContent = `
+      <h3 class="modal-title">تسجيل دين / ذمة جديدة</h3>
+      <div class="form-group">
+        <label class="form-label">اسم الشخص / الجهة</label>
+        <input type="text" id="m_dname" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">المبلغ المستحق</label>
+        <input type="number" id="m_damount" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">تاريخ الاستحقاق</label>
+        <input type="date" id="m_ddate" class="form-input">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="saveDebt()">تسجيل الدين</button>
+      </div>
+    `;
+  }
+  
+  root.innerHTML = `
+    <div class="modal-overlay">
+      <div class="modal">
+        ${modalContent}
+      </div>
     </div>
+  `;
+}
 
-    <!-- قالب الفاتورة -->
-    <div id="invoice-template">
-        <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
-            <h2>متجر FLORA - الفواتير والمبيعات</h2>
-            <p>فاتورة مبيعات معتمدة</p>
-        </div>
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-            <thead>
-                <tr style="background-color: #f2f2f2; border-bottom: 1px solid #ddd;">
-                    <th style="padding: 8px; text-align: right;">المنتج</th>
-                    <th style="padding: 8px; text-align: center;">القسم</th>
-                    <th style="padding: 8px; text-align: left;">السعر</th>
-                </tr>
-            </thead>
-            <tbody id="invoiceItems"></tbody>
-        </table>
-        <div style="text-align: left; font-size: 18px; font-weight: bold;">
-            المجموع الإجمالي: <span id="invoiceTotal">0.00</span> $
-        </div>
-    </div>
+// --- Action Handlers ---
+window.switchView = function(view) {
+  state.currentView = view;
+  state.activeFolder = 'جميع المنتجات';
+  state.currentTab = 'inventory';
+  render();
+};
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // --- 1. قفل النمط بأرقام الشاشة الحقيقية ---
-        let selectedSequence = [];
-        const targetSequence = "1,2,3,5,7,8,9"; // رسم حرف L بالأرقام 1,2,3,5,7,8,9
+window.switchTab = function(tab) {
+  state.currentTab = tab;
+  render();
+};
 
-        document.querySelectorAll('.dot').forEach(dot => {
-            dot.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                if (!selectedSequence.includes(id)) {
-                    selectedSequence.push(id);
-                    this.classList.add('selected');
-                    checkPattern();
-                }
-            });
-        });
+window.selectFolder = function(folder) {
+  state.activeFolder = folder;
+  render();
+};
 
-        function checkPattern() {
-            if (selectedSequence.join(',') === targetSequence) {
-                document.getElementById('lock-screen').classList.add('d-none');
-                document.getElementById('main-app').classList.remove('d-none');
-                initApp();
-            } else if (selectedSequence.length >= 7) {
-                alert("نمط القفل غير صحيح!");
-                resetPattern();
-            }
-        }
+window.handleSearch = function(q) {
+  state.searchQuery = q;
+  render();
+};
 
-        function resetPattern() {
-            selectedSequence = [];
-            document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
-        }
+window.openModal = function(modalType) {
+  state.modal = modalType;
+  renderModal();
+};
 
-        // --- 2. إدارة البيانات والتصنيفات ---
-        let currentCategory = 'الكل';
-        let products = JSON.parse(localStorage.getItem('my_job_products')) || [
-            { id: 1, name: 'أحمر شفاه FLORA', category: 'مكياج', price: 15.0 },
-            { id: 2, name: 'بلاشر كريمي FLORA', category: 'مكياج', price: 12.5 },
-            { id: 3, name: 'بيجامة قطن حرير FLORA', category: 'بيجامات وألبسة', price: 25.0 },
-            { id: 4, name: 'طقم بيجامة صيفي', category: 'بيجامات وألبسة', price: 20.0 }
-        ];
-        let cart = [];
+window.closeModal = function() {
+  state.modal = null;
+  renderModal();
+};
 
-        function initApp() {
-            renderProducts();
-            renderCart();
-        }
+window.saveProduct = function() {
+  const name = document.getElementById('m_pname').value;
+  const folder = document.getElementById('m_pfolder').value;
+  const price = parseFloat(document.getElementById('m_pprice').value) || 0;
+  const stock = parseInt(document.getElementById('m_pstock').value) || 0;
+  
+  if (!name) return;
+  
+  const data = getActiveData();
+  data.products.push({ id: Date.now(), name, folder, price, stock, cost: 0 });
+  closeModal();
+  render();
+};
 
-        function filterCategory(cat, btn) {
-            currentCategory = cat;
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderProducts();
-        }
+window.saveSale = function() {
+  const customer = document.getElementById('m_sclient').value || 'عميل عام';
+  const amount = parseFloat(document.getElementById('m_samount').value) || 0;
+  const note = document.getElementById('m_snote').value;
+  
+  const data = getActiveData();
+  data.sales.unshift({
+    id: Date.now(),
+    customer,
+    amount,
+    note,
+    date: new Date().toISOString().split('T')[0]
+  });
+  closeModal();
+  render();
+};
 
-        function renderProducts() {
-            const container = document.getElementById('productsList');
-            container.innerHTML = '';
+window.saveBatch = function() {
+  const title = document.getElementById('m_btitle').value;
+  const cost = parseFloat(document.getElementById('m_bcost').value) || 0;
+  
+  if (!title) return;
+  
+  state.floraData.manufacturing.unshift({
+    id: Date.now(),
+    title,
+    cost,
+    status: 'مكتملة',
+    date: new Date().toISOString().split('T')[0]
+  });
+  closeModal();
+  render();
+};
 
-            const filteredProducts = currentCategory === 'الكل' 
-                ? products 
-                : products.filter(p => p.category === currentCategory);
+window.saveDebt = function() {
+  const name = document.getElementById('m_dname').value;
+  const amount = parseFloat(document.getElementById('m_damount').value) || 0;
+  const dueDate = document.getElementById('m_ddate').value || 'غير محدد';
+  
+  if (!name) return;
+  
+  const data = getActiveData();
+  data.debts.unshift({
+    id: Date.now(),
+    name,
+    amount,
+    dueDate
+  });
+  closeModal();
+  render();
+};
 
-            if(filteredProducts.length === 0) {
-                container.innerHTML = '<div class="col-12 text-center text-muted py-5">لا توجد منتجات في هذا القسم حالياً</div>';
-                return;
-            }
+// Initial Render
+render();
 
-            filteredProducts.forEach(p => {
-                container.innerHTML += `
-                    <div class="col-md-4">
-                        <div class="product-card p-3 bg-white" onclick="addToCart(${p.id})">
-                            <span class="badge bg-secondary mb-2">${p.category}</span>
-                            <h5 class="fw-bold text-dark">${p.name}</h5>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="text-danger fw-bold fs-5">${p.price} $</span>
-                                <button class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-cart-plus"></i> إضافة</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            localStorage.setItem('my_job_products', JSON.stringify(products));
-        }
-
-        function saveProduct() {
-            const name = document.getElementById('pName').value;
-            const category = document.getElementById('pCategory').value;
-            const price = parseFloat(document.getElementById('pPrice').value);
-
-            if (name && !isNaN(price)) {
-                products.push({ id: Date.now(), name, category, price });
-                renderProducts();
-                bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
-                document.getElementById('pName').value = '';
-                document.getElementById('pPrice').value = '';
-            }
-        }
-
-        // --- 3. السلة والطباعة ---
-        function addToCart(id) {
-            const product = products.find(p => p.id === id);
-            cart.push(product);
-            renderCart();
-        }
-
-        function renderCart() {
-            const container = document.getElementById('cartList');
-            const totalEl = document.getElementById('totalPrice');
-            const btnPrint = document.getElementById('btnPrint');
-
-            if (cart.length === 0) {
-                container.innerHTML = '<p class="text-muted text-center mt-5">السلة فارغة حالياً</p>';
-                totalEl.innerText = '0.00 $';
-                btnPrint.disabled = true;
-                return;
-            }
-
-            container.innerHTML = '';
-            let total = 0;
-            cart.forEach((item, index) => {
-                total += item.price;
-                container.innerHTML += `
-                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
-                        <div>
-                            <div class="fw-bold">${item.name}</div>
-                            <small class="text-muted">${item.category} - ${item.price} $</small>
-                        </div>
-                        <button class="btn btn-sm btn-link text-danger" onclick="removeFromCart(${index})"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                `;
-            });
-
-            totalEl.innerText = total.toFixed(2) + ' $';
-            btnPrint.disabled = false;
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            renderCart();
-        }
-
-        function printInvoice() {
-            const invoiceItems = document.getElementById('invoiceItems');
-            const invoiceTotal = document.getElementById('invoiceTotal');
-            invoiceItems.innerHTML = '';
-
-            let total = 0;
-            cart.forEach(item => {
-                total += item.price;
-                invoiceItems.innerHTML += `
-                    <tr>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
-                        <td style="padding: 8px; text-align: center; border-bottom: 1px solid #ddd;">${item.category}</td>
-                        <td style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">${item.price} $</td>
-                    </tr>
-                `;
-            });
-            invoiceTotal.innerText = total.toFixed(2);
-
-            const element = document.getElementById('invoice-template');
-            element.style.display = 'block';
-
-            html2pdf().from(element).save('FLORA_Invoice.pdf').then(() => {
-                element.style.display = 'none';
-            });
-        }
-
-        function exportData() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", "FLORA_Backup.json");
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        function importData(event) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                products = JSON.parse(e.target.result);
-                renderProducts();
-                alert("تمت استعادة البيانات بنجاح!");
-            };
-            reader.readAsText(event.target.files[0]);
-        }
-    </script>
+})();
+</script>
 </body>
 </html>
