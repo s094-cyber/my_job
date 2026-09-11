@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MY JOB - نظام إدارة المبيعات والمنتجات</title>
+    <!-- مكتبات التنسيق، النمط، وتوليد الـ PDF -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --main-color: #d63384;
+            --main-hover: #b8256f;
+            --bg-color: #f8f9fa;
+        }
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+        }
+        /* شاشة القفل بالنمط */
+        #lock-screen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #111827;
+            color: white;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 70px);
+            grid-gap: 25px;
+            margin: 20px 0;
+        }
+        .dot {
+            width: 70px;
+            height: 70px;
+            background-color: #1f2937;
+            border: 2px solid var(--main-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+        }
+        .dot.selected {
+            background-color: var(--main-color);
+            box-shadow: 0 0 15px var(--main-color);
+        }
+        /* الواجهة الرئيسية */
+        .sidebar {
+            background-color: #ffffff;
+            border-left: 1px solid #e5e7eb;
+            height: calc(100vh - 60px);
+        }
+        .product-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .product-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        /* قالب الفاتورة المخصص للطباعة */
+        #invoice-template {
+            display: none;
+            padding: 20px;
+            background: #fff;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. شاشة القفل بالنمط -->
+    <div id="lock-screen">
+        <div class="text-center mb-3">
+            <i class="fa-solid fa-gem fa-3x text-danger mb-2"></i>
+            <h2>MY JOB / FLORA</h2>
+            <p class="text-muted">ارسم نمط الفتح (حرف L) للدخول للنظام</p>
+        </div>
+        <div class="pattern-grid" id="patternGrid">
+            <div class="dot" data-id="0">1</div>
+            <div class="dot" data-id="1">2</div>
+            <div class="dot" data-id="2">3</div>
+            <div class="dot" data-id="3">4</div>
+            <div class="dot" data-id="4">5</div>
+            <div class="dot" data-id="5">6</div>
+            <div class="dot" data-id="6">7</div>
+            <div class="dot" data-id="7">8</div>
+            <div class="dot" data-id="8">9</div>
+        </div>
+        <button class="btn btn-outline-light btn-sm mt-3" onclick="resetPattern()">إعادة المحاولة</button>
+    </div>
+
+    <!-- 2. الهيكل الرئيسي للموقع -->
+    <div id="main-app" class="d-none">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+            <a class="navbar-brand fw-bold" href="#"><i class="fa-solid fa-store me-2"></i>FLORA - MY JOB</a>
+            <div class="ms-auto d-flex gap-2">
+                <button class="btn btn-outline-light btn-sm" onclick="exportData()"><i class="fa-solid fa-download me-1"></i>نسخ احتياطي</button>
+                <label class="btn btn-outline-light btn-sm mb-0">
+                    <i class="fa-solid fa-upload me-1"></i>استعادة
+                    <input type="file" onchange="importData(event)" hidden accept=".json">
+                </label>
+                <button class="btn btn-danger btn-sm" onclick="location.reload()"><i class="fa-solid fa-lock"></i></button>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+            <div class="row">
+                <!-- قسم المنتجات -->
+                <div class="col-md-8 p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold">قائمة المنتجات</h4>
+                        <button class="btn btn-primary" style="background-color: var(--main-color); border:none;" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                            <i class="fa-solid fa-plus me-1"></i> إضافة منتج جديد
+                        </button>
+                    </div>
+
+                    <div class="row g-3" id="productsList">
+                        <!-- يتم عرض المنتجات هنا ديناميكياً -->
+                    </div>
+                </div>
+
+                <!-- شريط السلة والفاتورة -->
+                <div class="col-md-4 sidebar p-4 d-flex flex-column">
+                    <h4 class="fw-bold mb-3"><i class="fa-solid fa-cart-shopping me-2"></i>سلة الشراء</h4>
+                    <div class="flex-grow-1 overflow-auto" id="cartList">
+                        <p class="text-muted text-center mt-5">السلة فارغة حالياً</p>
+                    </div>
+                    
+                    <div class="border-top pt-3 mt-auto">
+                        <div class="d-flex justify-content-between fs-5 fw-bold mb-3">
+                            <span>المجموع الإجمالي:</span>
+                            <span id="totalPrice" class="text-danger">0.00 $</span>
+                        </div>
+                        <button class="btn btn-success w-100 py-2 fw-bold" id="btnPrint" onclick="printInvoice()" disabled>
+                            <i class="fa-solid fa-file-pdf me-2"></i>توليد طباعة الفاتورة (PDF)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إضافة منتج جديد -->
+    <div class="modal fade" id="addProductModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">إضافة منتج جديد</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">اسم المنتج</label>
+                        <input type="text" id="pName" class="form-control" placeholder="مثال: أحمر شفاه FLORA">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">السعر ($)</label>
+                        <input type="number" id="pPrice" class="form-control" placeholder="0.00">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProduct()">حفظ المنتج</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- قالب الفاتورة المخفي للـ PDF -->
+    <div id="invoice-template">
+        <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
+            <h2>متجر FLORA للجمال والمكياج</h2>
+            <p>فاتورة مبيعات - MY JOB System</p>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+                <tr style="background-color: #f2f2f2; border-bottom: 1px solid #ddd;">
+                    <th style="padding: 8px; text-align: right;">المنتج</th>
+                    <th style="padding: 8px; text-align: center;">العدد</th>
+                    <th style="padding: 8px; text-align: left;">السعر</th>
+                </tr>
+            </thead>
+            <tbody id="invoiceItems"></tbody>
+        </table>
+        <div style="text-align: left; font-size: 18px; font-weight: bold;">
+            المجموع الإجمالي: <span id="invoiceTotal">0.00</span> $
+        </div>
+    </div>
+
+    <!-- البرمجة التفاعلية (JavaScript) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // --- 1. إدارة قفل النمط ---
+        let selectedSequence = [];
+        const targetSequence = "0,1,2,4,6,7,8"; // مسار حرف L الشهير
+
+        document.querySelectorAll('.dot').forEach(dot => {
+            dot.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                if (!selectedSequence.includes(id)) {
+                    selectedSequence.push(id);
+                    this.classList.add('selected');
+                    checkPattern();
+                }
+            });
+        });
+
+        function checkPattern() {
+            if (selectedSequence.join(',') === targetSequence) {
+                document.getElementById('lock-screen').classList.add('d-none');
+                document.getElementById('main-app').classList.remove('d-none');
+                initApp();
+            } else if (selectedSequence.length >= 7) {
+                alert("نمط القفل غير صحيح!");
+                resetPattern();
+            }
+        }
+
+        function resetPattern() {
+            selectedSequence = [];
+            document.querySelectorAll('.dot').forEach(d => d.classList.remove('selected'));
+        }
+
+        // --- 2. إدارة البيانات والمنتجات ---
+        let products = JSON.parse(localStorage.getItem('my_job_products')) || [
+            { id: 1, name: 'أحمر شفاه سائل FLORA', price: 15.0 },
+            { id: 2, name: 'بلاشر كريمي وردي FLORA', price: 12.5 }
+        ];
+        let cart = [];
+
+        function initApp() {
+            renderProducts();
+            renderCart();
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('productsList');
+            container.innerHTML = '';
+            products.forEach(p => {
+                container.innerHTML += `
+                    <div class="col-md-4">
+                        <div class="product-card p-3 bg-white" onclick="addToCart(${p.id})">
+                            <h5 class="fw-bold text-dark">${p.name}</h5>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="text-danger fw-bold fs-5">${p.price} $</span>
+                                <button class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-cart-plus"></i> إضافة</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            localStorage.setItem('my_job_products', JSON.stringify(products));
+        }
+
+        function saveProduct() {
+            const name = document.getElementById('pName').value;
+            const price = parseFloat(document.getElementById('pPrice').value);
+            if (name && !isNaN(price)) {
+                products.push({ id: Date.now(), name, price });
+                renderProducts();
+                bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+                document.getElementById('pName').value = '';
+                document.getElementById('pPrice').value = '';
+            }
+        }
+
+        // --- 3. إدارة السلة وتوليد الفاتورة ---
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            cart.push(product);
+            renderCart();
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cartList');
+            const totalEl = document.getElementById('totalPrice');
+            const btnPrint = document.getElementById('btnPrint');
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center mt-5">السلة فارغة حالياً</p>';
+                totalEl.innerText = '0.00 $';
+                btnPrint.disabled = true;
+                return;
+            }
+
+            container.innerHTML = '';
+            let total = 0;
+            cart.forEach((item, index) => {
+                total += item.price;
+                container.innerHTML += `
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                        <div>
+                            <div class="fw-bold">${item.name}</div>
+                            <small class="text-muted">${item.price} $</small>
+                        </div>
+                        <button class="btn btn-sm btn-link text-danger" onclick="removeFromCart(${index})"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+            });
+
+            totalEl.innerText = total.toFixed(2) + ' $';
+            btnPrint.disabled = false;
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        // --- 4. طباعة وتوليد PDF ---
+        function printInvoice() {
+            const invoiceItems = document.getElementById('invoiceItems');
+            const invoiceTotal = document.getElementById('invoiceTotal');
+            invoiceItems.innerHTML = '';
+
+            let total = 0;
+            cart.forEach(item => {
+                total += item.price;
+                invoiceItems.innerHTML += `
+                    <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.name}</td>
+                        <td style="padding: 8px; text-align: center; border-bottom: 1px solid #ddd;">1</td>
+                        <td style="padding: 8px; text-align: left; border-bottom: 1px solid #ddd;">${item.price} $</td>
+                    </tr>
+                `;
+            });
+            invoiceTotal.innerText = total.toFixed(2);
+
+            const element = document.getElementById('invoice-template');
+            element.style.display = 'block';
+
+            html2pdf().from(element).save('FLORA_Invoice.pdf').then(() => {
+                element.style.display = 'none';
+            });
+        }
+
+        // --- 5. النسخ الاحتياطي والاستعادة ---
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "FLORA_Backup.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importData(event) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                products = JSON.parse(e.target.result);
+                renderProducts();
+                alert("تمت استعادة البيانات بنجاح!");
+            };
+            reader.readAsText(event.target.files[0]);
+        }
+    </script>
+</body>
+</html>
